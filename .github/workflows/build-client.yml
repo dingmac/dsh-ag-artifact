@@ -33,6 +33,18 @@ jobs:
           for f in lib/*.js lib/core/*.js scripts/*.mjs; do node --check "$f"; done
           node scripts/check-client.mjs
           npm test
+      - name: Install CJK fonts
+        continue-on-error: true
+        timeout-minutes: 6
+        run: sudo apt-get update && sudo apt-get install -y fonts-noto-cjk
+      - name: Generate UI screenshots with preinstalled Chrome
+        continue-on-error: true
+        timeout-minutes: 8
+        env:
+          PW_CHANNEL: chrome
+        run: |
+          node scripts/preview.mjs
+          node scripts/screenshot.mjs
       - name: Normalize text endings
         run: |
           perl -0pi -e 's/\n*\z/\n/' lib/tools.js
@@ -50,9 +62,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add lib/client.js lib/tools.js package.json .ci/verify.json
+          git add preview/settings-light.png preview/settings-dark.png 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "generated files are up to date"
           else
-            git commit -m "build: regenerate lib/client.js"
+            git commit -m "build: regenerate client bundle and screenshots"
             git push
           fi
