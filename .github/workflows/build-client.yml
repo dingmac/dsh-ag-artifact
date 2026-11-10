@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'client/**'
+      - 'test/**'
       - 'lib/core/**'
       - 'scripts/build-client.mjs'
       - 'package.json'
@@ -25,12 +26,13 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Build browser bundle
         run: node scripts/build-client.mjs
-      - name: Verify sources and bundle contract
+      - name: Verify sources, bundle contract and tests
         id: verify
         continue-on-error: true
         run: |
           for f in lib/*.js lib/core/*.js scripts/*.mjs; do node --check "$f"; done
           node scripts/check-client.mjs
+          npm test
       - name: Normalize text endings
         run: |
           perl -0pi -e 's/\n*\z/\n/' lib/tools.js
