@@ -6,6 +6,16 @@
 DeepSeek Harness 的**产出物路径规范插件**：配置全局产出根目录与参数化五层目录规则，提供落盘工具，
 以及一个**可视化设置页**（设置 → 产出规范）用于核对、编辑、试算和确认保存。
 
+## 界面预览
+
+浅色（首次接管后的审阅态）：
+
+![设置页 · 浅色](preview/settings-light.png)
+
+深色（已确认态）：
+
+![设置页 · 深色](preview/settings-dark.png)
+
 ## 特性
 
 - **全局根目录**：`agHome` 一处配置，工具与系统提示共用；留空可回退读取旧 `ag_config.json`。
@@ -54,8 +64,9 @@ dsh-ag-artifact/
 │   ├── build-client.mjs  # esbuild → DSH ModuleLoader 格式 bundle
 │   ├── check-client.mjs  # 不需要浏览器：校验 bundle 契约 + SSR 渲染
 │   ├── preview.mjs       # 用真实组件生成设置页预览 HTML
-│   ├── screenshot.mjs    # 预览 HTML → PNG（本地需要 playwright）
+│   ├── screenshot.mjs    # 预览 HTML → PNG（CI 用预装 Chrome）
 │   └── migrate.mjs       # 旧配置 → 配置片段（备用）
+├── preview/              # 设置页截图（CI 生成）
 └── test/                 # 47 条单测
 ```
 
@@ -77,7 +88,55 @@ dsh-ag-artifact/
 保存走 `configForms` 的 `mutate(ops, revision)`：只提交真正变化的字段，修订号不一致时保留草稿并提示，
 不会静默覆盖其他窗口的修改。
 
-> 截图未入库：本地执行 `npm run preview && npm run screenshot` 会在 `preview/` 生成浅色/深色两张 PNG。
+## 使用说明
+
+安装并启用后，日常不需要手动建目录——把规则交给插件，按下面三步走：
+
+1. **文本产出**（`.md/.py/.sh/.html/.json/.csv`）→ 调用 `artifact_save`，自动清洗段名、分配 `_vN+1`。
+2. **脚本 / 二进制产出**（`.xlsx/.png/.pdf` 等）→ 先写到会话工作区的 `.ag-staging/`，再用 `artifact_place` 移入（默认移动，不留副本）。
+3. **收尾** → `artifact_verify` 自查，再对最终文件调用 `present` 交付。
+
+调用示例：
+
+```json
+// 1) 文本产出直接落盘
+artifact_save({
+  "type": "报告", "category": "库存对账", "topic": "差异分析",
+  "content": "# 差异分析\n..."
+})
+
+// 2) 先看落点（不写盘）
+artifact_save({ "type": "报告", "category": "库存对账", "topic": "差异分析", "content": "x", "dry_run": true })
+
+// 3) 把脚本生成的 xlsx 搬入正式路径
+artifact_place({
+  "source_path": ".ag-staging/塞艾斯库存比对.xlsx",
+  "type": "数据", "category": "库存对账", "topic": "塞艾斯库存比对"
+})
+
+// 4) 五层结构自查
+artifact_verify({})
+```
+
+行为约定：
+
+- **版本只增不改**：目标已存在自动 +1；显式传已存在的 `version` 会**拒绝覆盖**。
+- **批次**：`reuse` 复用该主题最新批次，`new` 每次新建，`explicit` 必须显式给 `batch`。
+- **暂存目录**默认 `.ag-staging`，交付前清空；不要用 `bash` 直接写产出根目录（会被会话文件沙箱拒绝）。
+- **版本号按主题计**：同一小类目录里的同一主题跨天仍递增，不会每天从 v1 重开。
+
+配置速查：
+
+| 字段 | 默认值 | 说明 |
+|---|---|---|
+| `agHome` | `''` | 产出根目录绝对路径；空则回退 `legacyConfigFile` |
+| `templateTask` `templateCategory` `templateTypeDir` `templateBatch` `templateFile` | 五层默认模板 | 每层一个模板；文件名必须含 `{n}` |
+| `typeDirs` | 脚本/报告/数据/截图/原型/参考 | 类型 → 大类目录；可加 `default` 兜底 |
+| `defaultExt` | 按类型 | `artifact_save` 缺省扩展名 |
+| `dateSource` / `dateFormat` | `today` / `YYYYMMDD` | 文件名日期来源与格式 |
+| `batchPolicy` | `reuse` | `reuse` / `new` / `explicit` |
+| `stagingDir` | `.ag-staging` | 会话工作区内的暂存目录 |
+| `strictTypeDir` | `true` | 第 3 层必须命中类型目录 |
 
 ## 安装与启用
 
@@ -113,11 +172,11 @@ NODE="/Applications/DeepSeek Harness.app/Contents/Resources/runtime/primary-runt
 "$NODE" scripts/check-client.mjs    # bundle 契约 + SSR 冒烟（无需浏览器）
 "$NODE" --test test/*.test.mjs      # 47 条单测
 "$NODE" scripts/preview.mjs         # 生成 UI 预览 HTML
-"$NODE" scripts/screenshot.mjs      # 预览 HTML → PNG（需要 playwright chromium）
+"$NODE" scripts/screenshot.mjs      # 预览 HTML → PNG
 ```
 
 CI（GitHub Actions）会在每次推送时构建 bundle、跑语法检查、bundle 契约检查与全部单测，
-并在 `lib/` 发生变化时自动提交新的构建产物。
+并重新生成 `preview/*.png` 截图后自动提交。
 
 ## 已验证 / 待验证
 
