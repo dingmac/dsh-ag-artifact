@@ -103,7 +103,7 @@ NODE="/Applications/DeepSeek Harness.app/Contents/Resources/runtime/primary-runt
   （`agHome` / `typeDirs` / `dateFormat` / `importedFrom` / `confirmed: false`）。
 - 客户端装载：启动图里出现 `dsh-ag-artifact` 模块，`inject: ["@deepseek-ai/dsh-client-locale", "@deepseek-ai/dsh-client-ui-settings"]` 解析通过；
   `/plugins/??dsh-ag-artifact/client.js` 返回 200。
-- 单测 41 条全绿。
+- 单测 47 条全绿。
 
 **待验证（需要安装到当前 profile 并在浏览器里看一次）**
 
