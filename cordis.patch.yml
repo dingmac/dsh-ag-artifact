@@ -1,0 +1,12 @@
+# dsh-ag-artifact 的 bundle patch 层。
+#
+# disabled: true 是刻意的：安装 ≠ 生效。
+#   - 停用（默认）：不注册工具、不注入提示、不读写任何配置，现有工作流完全不受影响；
+#   - 启用：插件开始工作；首次启用会自动读取旧 ag_config.json 并接管为插件配置
+#     （只写本 profile 的 cordis.patch.yml，不动旧文件），随后在「设置 → 产出规范」
+#     里核对并点「确认并启用」才算完成。
+#   - 再次停用：只改这一行的 disabled，配置与产出目录都保留，不做任何迁移或清理。
+- insert:
+    - id: ag-artifact
+      name: 'dsh-ag-artifact'
+      disabled: true

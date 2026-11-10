@@ -1,0 +1,60 @@
+{
+  "name": "dsh-ag-artifact",
+  "version": "0.1.0",
+  "description": "AG 产出物路径规范插件：全局产出根目录 + 参数化五层目录模板 + 落盘工具 + 可视化设置页",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib",
+    "client",
+    "cordis.patch.yml",
+    "README.md",
+    "LICENSE",
+    "scripts"
+  ],
+  "license": "MIT",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-locale",
+        "@deepseek-ai/dsh-client-ui-settings"
+      ],
+      "platform": "web"
+    }
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh-tools": "0.2.2-rc.1",
+    "@deepseek-ai/schemastery": "3.19.0"
+  },
+  "scripts": {
+    "build": "node scripts/build-client.mjs && node scripts/check-client.mjs",
+    "build:client": "node scripts/build-client.mjs",
+    "check:client": "node scripts/check-client.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "^0.28.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "artifact",
+    "output-spec",
+    "file-layout",
+    "deepseek-harness",
+    "cordis"
+  ],
+  "engines": {
+    "dsh": ">=0.2.2-rc.1 <0.3.0-0"
+  }
+}
