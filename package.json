@@ -18,6 +18,15 @@
     "scripts"
   ],
   "license": "MIT",
+  "author": "dingmac",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dingmac/dsh-ag-artifact.git"
+  },
+  "homepage": "https://github.com/dingmac/dsh-ag-artifact#readme",
+  "bugs": {
+    "url": "https://github.com/dingmac/dsh-ag-artifact/issues"
+  },
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
@@ -38,10 +47,13 @@
     "build": "node scripts/build-client.mjs && node scripts/check-client.mjs",
     "build:client": "node scripts/build-client.mjs",
     "check:client": "node scripts/check-client.mjs",
+    "preview": "node scripts/preview.mjs",
+    "screenshot": "node scripts/screenshot.mjs",
     "test": "node --test test/*.test.mjs"
   },
   "devDependencies": {
     "esbuild": "^0.28.2",
+    "playwright": "^1.65.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
